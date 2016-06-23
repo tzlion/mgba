@@ -381,9 +381,6 @@ static void GBASetActiveRegion(struct ARMCore* cpu, uint32_t address) {
 
 #define LOAD_CART \
 	wait += waitstatesRegion[address >> BASE_OFFSET]; \
-	if (memory->vfame.cartType) { \
-		address = GBAVFameModifyRomAddress(&memory->vfame, address, memory->romSize); \
-	} \
 	if ((address & (SIZE_CART0 - 1)) < memory->romSize) { \
 		LOAD_32(value, address & (SIZE_CART0 - 4), memory->rom); \
 	} else if (memory->mirroring && (address & memory->romMask) < memory->romSize) { \
@@ -518,9 +515,6 @@ uint32_t GBALoad16(struct ARMCore* cpu, uint32_t address, int* cycleCounter) {
 	case REGION_CART1_EX:
 	case REGION_CART2:
 		wait = memory->waitstatesNonseq16[address >> BASE_OFFSET];
-		if (memory->vfame.cartType) {
-			address = GBAVFameModifyRomAddress(&memory->vfame, address, memory->romSize);
-		}
 		if ((address & (SIZE_CART0 - 1)) < memory->romSize) {
 			LOAD_16(value, address & (SIZE_CART0 - 2), memory->rom);
 		} else if (memory->mirroring && (address & memory->romMask) < memory->romSize) {
@@ -621,9 +615,6 @@ uint32_t GBALoad8(struct ARMCore* cpu, uint32_t address, int* cycleCounter) {
 	case REGION_CART2:
 	case REGION_CART2_EX:
 		wait = memory->waitstatesNonseq16[address >> BASE_OFFSET];
-		if (memory->vfame.cartType) {
-			address = GBAVFameModifyRomAddress(&memory->vfame, address, memory->romSize);
-		}
 		if ((address & (SIZE_CART0 - 1)) < memory->romSize) {
 			value = ((uint8_t*) memory->rom)[address & (SIZE_CART0 - 1)];
 		} else if (memory->mirroring && (address & memory->romMask) < memory->romSize) {

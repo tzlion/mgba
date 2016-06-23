@@ -73,8 +73,6 @@ void GBAVFameDetect(struct GBAVFameCart* cart, uint32_t* rom, size_t romSize) {
 	}
 }
 
-// This is not currently being used but would be called on ROM reads
-// Emulates mirroring used by real VF carts, but no games seem to rely on this behaviour
 uint32_t GBAVFameModifyRomAddress(struct GBAVFameCart* cart, uint32_t address, size_t romSize) {
 	if (cart->romMode == -1 && address < BASE_CART0_EX) {
 		// When ROM mode is uninitialised, it just mirrors the first 0x80000 bytes

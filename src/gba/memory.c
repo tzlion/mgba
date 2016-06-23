@@ -381,14 +381,14 @@ static void GBASetActiveRegion(struct ARMCore* cpu, uint32_t address) {
 
 #define LOAD_CART \
 	wait += waitstatesRegion[address >> BASE_OFFSET]; \
-	if ( memory->vfame.cartType ) { \
+	if (memory->vfame.cartType) { \
 		address = GBAVFameModifyRomAddress(&memory->vfame, address, memory->romSize); \
 	} \
 	if ((address & (SIZE_CART0 - 1)) < memory->romSize) { \
 		LOAD_32(value, address & (SIZE_CART0 - 4), memory->rom); \
 	} else if (memory->mirroring && (address & memory->romMask) < memory->romSize) { \
 		LOAD_32(value, address & memory->romMask, memory->rom); \
-	} else if (memory->vfame.cartType && address <= 0x09FFFFFF) { \
+	} else if (memory->vfame.cartType && address < BASE_CART1) { \
 		value = GBAVFameGetPatternValue(address, 32); \
 	} else { \
 		mLOG(GBA_MEM, GAME_ERROR, "Out of bounds ROM Load32: 0x%08X", address); \
@@ -525,7 +525,7 @@ uint32_t GBALoad16(struct ARMCore* cpu, uint32_t address, int* cycleCounter) {
 			LOAD_16(value, address & (SIZE_CART0 - 2), memory->rom);
 		} else if (memory->mirroring && (address & memory->romMask) < memory->romSize) {
 			LOAD_16(value, address & memory->romMask, memory->rom);
-		} else if (memory->vfame.cartType && address <= 0x09FFFFFF) {
+		} else if (memory->vfame.cartType && address < BASE_CART1) {
 			value = GBAVFameGetPatternValue(address, 16);
 		} else {
 			mLOG(GBA_MEM, GAME_ERROR, "Out of bounds ROM Load16: 0x%08X", address);
@@ -621,14 +621,14 @@ uint32_t GBALoad8(struct ARMCore* cpu, uint32_t address, int* cycleCounter) {
 	case REGION_CART2:
 	case REGION_CART2_EX:
 		wait = memory->waitstatesNonseq16[address >> BASE_OFFSET];
-		if ( memory->vfame.cartType ) {
+		if (memory->vfame.cartType) {
 			address = GBAVFameModifyRomAddress(&memory->vfame, address, memory->romSize);
 		}
 		if ((address & (SIZE_CART0 - 1)) < memory->romSize) {
 			value = ((uint8_t*) memory->rom)[address & (SIZE_CART0 - 1)];
 		} else if (memory->mirroring && (address & memory->romMask) < memory->romSize) {
 			value = ((uint8_t*) memory->rom)[address & memory->romMask];
-		} else if (memory->vfame.cartType && address <= 0x09FFFFFF) {
+		} else if (memory->vfame.cartType && address < BASE_CART1) {
 			value = GBAVFameGetPatternValue(address, 8);
 		} else {
 			mLOG(GBA_MEM, GAME_ERROR, "Out of bounds ROM Load8: 0x%08X", address);
@@ -656,7 +656,6 @@ uint32_t GBALoad8(struct ARMCore* cpu, uint32_t address, int* cycleCounter) {
 			value = 0xFF;
 		}
 		value &= 0xFF;
-
 		break;
 	default:
 		mLOG(GBA_MEM, GAME_ERROR, "Bad memory Load8: 0x%08x", address);

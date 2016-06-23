@@ -119,6 +119,7 @@ struct GBAMemory {
 
 	struct GBACartridgeHardware hw;
 	struct GBASavedata savedata;
+	struct GBAVFameCart vfame;
 	size_t romSize;
 	uint32_t romMask;
 	uint16_t romID;
@@ -144,8 +145,6 @@ struct GBAMemory {
 	int32_t eventDiff;
 
 	bool mirroring;
-
-	struct GBAVFameCart vfame;
 };
 
 void GBAMemoryInit(struct GBA* gba);

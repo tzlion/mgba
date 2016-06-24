@@ -22,7 +22,7 @@ struct GBAVFameCart {
 	int sramMode;
 	int romMode;
 	int8_t writeSequence[5];
-	char acceptingModeChange;
+	bool acceptingModeChange;
 };
 
 void GBAVFameInit(struct GBAVFameCart* cart);

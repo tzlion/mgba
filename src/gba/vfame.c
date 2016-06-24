@@ -37,7 +37,6 @@ static const char INIT_SEQUENCE[16] = { 0xB4, 0x00, 0x9F, 0xE5, 0x99, 0x10, 0xA0
 
 static bool _isInMirroredArea(uint32_t address, size_t romSize);
 static uint32_t _getPatternValue(uint32_t addr);
-static uint32_t _patternRightShift1(uint32_t addr);
 static uint32_t _patternRightShift2(uint32_t addr);
 static int8_t _modifySramValue(enum GBAVFameCartType type, int8_t value, int mode);
 static uint32_t _modifySramAddress(enum GBAVFameCartType type, uint32_t address, int mode);
@@ -74,10 +73,10 @@ void GBAVFameDetect(struct GBAVFameCart* cart, uint32_t* rom, size_t romSize) {
 }
 
 uint32_t GBAVFameModifyRomAddress(struct GBAVFameCart* cart, uint32_t address, size_t romSize) {
-	if (cart->romMode == -1 && address < BASE_CART0_EX) {
+	if (cart->romMode == -1 && (address & 0x01000000) == 0) {
 		// When ROM mode is uninitialised, it just mirrors the first 0x80000 bytes
 		// All known games set the ROM mode to 00 which enables full range of reads, it's currently unknown what other values do
-		address = address & 0x7FFFF;
+		address &= 0x7FFFF;
 	} else if (_isInMirroredArea(address, romSize)) {
 		address -= 0x800000;
 	}
@@ -85,14 +84,15 @@ uint32_t GBAVFameModifyRomAddress(struct GBAVFameCart* cart, uint32_t address, s
 }
 
 static bool _isInMirroredArea(uint32_t address, size_t romSize) {
+	address &= 0x01FFFFFF;
 	// For some reason known 4m games e.g. Zook, Sango repeat the game at 800000 but the 8m Digimon R. does not
 	if (romSize != 0x400000) {
 		return false;
 	}
-	if (address < 0x08800000) {
+	if (address < 0x800000) {
 		return false;
 	}
-	if (address >= 0x08800000 + romSize) {
+	if (address >= 0x800000 + romSize) {
 		return false;
 	}
 	return true;
@@ -123,7 +123,7 @@ static uint32_t _getPatternValue(uint32_t addr) {
 	switch(addr & 0x1F0000) {
 	case 0x000000:
 	case 0x010000:
-		value = _patternRightShift1(addr);
+		value = (addr >> 1) & 0xFFFF;
 		break;
 	case 0x020000:
 		value = addr & 0xFFFF;
@@ -173,51 +173,48 @@ static uint32_t _getPatternValue(uint32_t addr) {
 		break;
 	case 0x140000:
 	case 0x150000:
-		value = _patternRightShift1(addr) ^ 0xAAAA;
+		value = ((addr >> 1) & 0xFFFF) ^ 0xAAAA;
 		break;
 	case 0x160000:
 	case 0x170000:
-		value = _patternRightShift1(addr) ^ 0x5555;
+		value = ((addr >> 1) & 0xFFFF) ^ 0x5555;
 		break;
 	case 0x180000:
 	case 0x190000:
-		value = _patternRightShift1(addr) ^ 0xF0F0;
+		value = ((addr >> 1) & 0xFFFF) ^ 0xF0F0;
 		break;
 	case 0x1A0000:
 	case 0x1B0000:
-		value = _patternRightShift1(addr) ^ 0x0F0F;
+		value = ((addr >> 1) & 0xFFFF) ^ 0x0F0F;
 		break;
 	case 0x1C0000:
 	case 0x1D0000:
-		value = _patternRightShift1(addr) ^ 0xFF00;
+		value = ((addr >> 1) & 0xFFFF) ^ 0xFF00;
 		break;
 	case 0x1E0000:
 	case 0x1F0000:
-		value = _patternRightShift1(addr) ^ 0x00FF;
+		value = ((addr >> 1) & 0xFFFF) ^ 0x00FF;
 		break;
 	}
 
 	return value & 0xFFFF;
 }
 
-static uint32_t _patternRightShift1(uint32_t addr) {
-	return (addr >> 1) & 0xFFFF;
-}
-
 static uint32_t _patternRightShift2(uint32_t addr) {
 	uint32_t value = addr & 0xFFFF;
-	value = value >> 2;
+	value >>= 2;
 	value += (addr & 3) == 2 ? 0x8000 : 0;
 	value += (addr & 0x10000) ? 0x4000 : 0;
 	return value;
 }
 
 void GBAVFameSramWrite(struct GBAVFameCart* cart, uint32_t address, int8_t value, uint8_t* sramData) {
+	address &= 0x00FFFFFF;
 	// A certain sequence of writes to SRAM FFF8->FFFC can enable or disable "mode change" mode
 	// Currently unknown if these writes have to be sequential, or what happens if you write different values, if anything
-	if (address >= 0x0E00FFF8 && address <= 0xE00FFFC) {
-		cart->writeSequence[address - 0x0E00FFF8] = value;
-		if (address == 0xE00FFFC) {
+	if (address >= 0xFFF8 && address <= 0xFFFC) {
+		cart->writeSequence[address - 0xFFF8] = value;
+		if (address == 0xFFFC) {
 			if (memcmp(MODE_CHANGE_START_SEQUENCE, cart->writeSequence, sizeof(MODE_CHANGE_START_SEQUENCE)) == 0){
 				cart->acceptingModeChange = true;
 			}
@@ -230,9 +227,9 @@ void GBAVFameSramWrite(struct GBAVFameCart* cart, uint32_t address, int8_t value
 	// If we are in "mode change mode" we can change either SRAM or ROM modes
 	// Currently unknown if other SRAM writes in this mode should have any effect
 	if (cart->acceptingModeChange) {
-		if (address == 0x0E00FFFE) {
+		if (address == 0xFFFE) {
 			cart->sramMode = value;
-		} else if (address == 0xE00FFFD) {
+		} else if (address == 0xFFFD) {
 			cart->romMode = value;
 		}
 	}
@@ -246,11 +243,9 @@ void GBAVFameSramWrite(struct GBAVFameCart* cart, uint32_t address, int8_t value
 	address = _modifySramAddress(cart->cartType, address, cart->sramMode);
 	value = _modifySramValue(cart->cartType, value, cart->sramMode);
 	// these writes are mirrored
-	if (address >= 0xE008000) {
-		address -= 0x8000;
-	}
-	sramData[address & (SIZE_CART_SRAM - 1)] = value;
-	sramData[(address + 0x8000) & (SIZE_CART_SRAM - 1)] = value;
+	address &= 0x7FFF;
+	sramData[address] = value;
+	sramData[address + 0x8000] = value;
 }
 
 static uint32_t _modifySramAddress(enum GBAVFameCartType type, uint32_t address, int mode) {
@@ -281,7 +276,7 @@ static int _reorderBits(uint32_t value, const uint8_t* reordering, int reorderLe
 
 	int x;
 	for (x = reorderLength; x > 0; x--) {
-		char reorderPlace = reordering[reorderLength - x]; // get the reorder position
+		uint8_t reorderPlace = reordering[reorderLength - x]; // get the reorder position
 
 		uint32_t mask = 1 << reorderPlace; // move the bit to the position we want
 		uint32_t val = value & mask; // AND it with the original value

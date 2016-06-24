@@ -388,7 +388,7 @@ static void GBASetActiveRegion(struct ARMCore* cpu, uint32_t address) {
 		LOAD_32(value, address & (SIZE_CART0 - 4), memory->rom); \
 	} else if (memory->mirroring && (address & memory->romMask) < memory->romSize) { \
 		LOAD_32(value, address & memory->romMask, memory->rom); \
-	} else if (memory->vfame.cartType && address < BASE_CART1) { \
+	} else if (memory->vfame.cartType) { \
 		value = GBAVFameGetPatternValue(address, 32); \
 	} else { \
 		mLOG(GBA_MEM, GAME_ERROR, "Out of bounds ROM Load32: 0x%08X", address); \
@@ -525,7 +525,7 @@ uint32_t GBALoad16(struct ARMCore* cpu, uint32_t address, int* cycleCounter) {
 			LOAD_16(value, address & (SIZE_CART0 - 2), memory->rom);
 		} else if (memory->mirroring && (address & memory->romMask) < memory->romSize) {
 			LOAD_16(value, address & memory->romMask, memory->rom);
-		} else if (memory->vfame.cartType && address < BASE_CART1) {
+		} else if (memory->vfame.cartType) {
 			value = GBAVFameGetPatternValue(address, 16);
 		} else {
 			mLOG(GBA_MEM, GAME_ERROR, "Out of bounds ROM Load16: 0x%08X", address);
@@ -540,6 +540,8 @@ uint32_t GBALoad16(struct ARMCore* cpu, uint32_t address, int* cycleCounter) {
 			LOAD_16(value, address & (SIZE_CART0 - 2), memory->rom);
 		} else if (memory->mirroring && (address & memory->romMask) < memory->romSize) {
 			LOAD_16(value, address & memory->romMask, memory->rom);
+		} else if (memory->vfame.cartType) {
+			value = GBAVFameGetPatternValue(address, 16);
 		} else {
 			mLOG(GBA_MEM, GAME_ERROR, "Out of bounds ROM Load16: 0x%08X", address);
 			value = (address >> 1) & 0xFFFF;
@@ -628,7 +630,7 @@ uint32_t GBALoad8(struct ARMCore* cpu, uint32_t address, int* cycleCounter) {
 			value = ((uint8_t*) memory->rom)[address & (SIZE_CART0 - 1)];
 		} else if (memory->mirroring && (address & memory->romMask) < memory->romSize) {
 			value = ((uint8_t*) memory->rom)[address & memory->romMask];
-		} else if (memory->vfame.cartType && address < BASE_CART1) {
+		} else if (memory->vfame.cartType) {
 			value = GBAVFameGetPatternValue(address, 8);
 		} else {
 			mLOG(GBA_MEM, GAME_ERROR, "Out of bounds ROM Load8: 0x%08X", address);

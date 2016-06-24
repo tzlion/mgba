@@ -210,7 +210,7 @@ void GBAVFameSramWrite(struct GBAVFameCart* cart,uint32_t address, int8_t value,
 	// Currently unknown if these writes have to be sequential, or what happens if you write different values, if anything
 	if (address >= 0x0E00FFF8 && address <= 0xE00FFFC) {
 		cart->writeSequence[address - 0x0E00FFF8] = value;
-		if ( address == 0xE00FFFC ) {
+		if (address == 0xE00FFFC) {
 			if (memcmp(MODE_CHANGE_START_SEQUENCE, cart->writeSequence, sizeof(MODE_CHANGE_START_SEQUENCE))==0){
 				cart->acceptingModeChange = true;
 			}

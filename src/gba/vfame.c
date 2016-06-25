@@ -38,7 +38,7 @@ static const char INIT_SEQUENCE[16] = { 0xB4, 0x00, 0x9F, 0xE5, 0x99, 0x10, 0xA0
 static bool _isInMirroredArea(uint32_t address, size_t romSize);
 static uint32_t _getPatternValue(uint32_t addr);
 static uint32_t _patternRightShift2(uint32_t addr);
-static int8_t _modifySramValue(enum GBAVFameCartType type, int8_t value, int mode);
+static int8_t _modifySramValue(enum GBAVFameCartType type, uint8_t value, int mode);
 static uint32_t _modifySramAddress(enum GBAVFameCartType type, uint32_t address, int mode);
 static int _reorderBits(uint32_t value, const uint8_t* reordering, int reorderLength);
 
@@ -259,7 +259,7 @@ static uint32_t _modifySramAddress(enum GBAVFameCartType type, uint32_t address,
 	}
 }
 
-static int8_t _modifySramValue(enum GBAVFameCartType type, int8_t value, int mode) {
+static int8_t _modifySramValue(enum GBAVFameCartType type, uint8_t value, int mode) {
 	mode = (mode & 0xF) >> 2;
 	if (mode == 0) {
 		return value;

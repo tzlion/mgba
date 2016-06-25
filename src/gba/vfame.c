@@ -208,7 +208,7 @@ static uint32_t _patternRightShift2(uint32_t addr) {
 	return value;
 }
 
-void GBAVFameSramWrite(struct GBAVFameCart* cart, uint32_t address, int8_t value, uint8_t* sramData) {
+void GBAVFameSramWrite(struct GBAVFameCart* cart, uint32_t address, uint8_t value, uint8_t* sramData) {
 	address &= 0x00FFFFFF;
 	// A certain sequence of writes to SRAM FFF8->FFFC can enable or disable "mode change" mode
 	// Currently unknown if these writes have to be sequential, or what happens if you write different values, if anything

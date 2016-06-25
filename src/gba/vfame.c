@@ -253,9 +253,9 @@ static uint32_t _modifySramAddress(enum GBAVFameCartType type, uint32_t address,
 	if (mode == 0) {
 		return address;
 	} else if (type == VFAME_GEORGE) {
-		return _reorderBits(address, ADDRESS_REORDERING_GEORGE[mode-1], 16);
+		return _reorderBits(address, ADDRESS_REORDERING_GEORGE[mode - 1], 16);
 	} else {
-		return _reorderBits(address, ADDRESS_REORDERING[mode-1], 16);
+		return _reorderBits(address, ADDRESS_REORDERING[mode - 1], 16);
 	}
 }
 
@@ -264,9 +264,9 @@ static int8_t _modifySramValue(enum GBAVFameCartType type, int8_t value, int mod
 	if (mode == 0) {
 		return value;
 	} else if (type == VFAME_GEORGE) {
-		return _reorderBits(value, VALUE_REORDERING_GEORGE[mode-1], 8);
+		return _reorderBits(value, VALUE_REORDERING_GEORGE[mode - 1], 8);
 	} else {
-		return _reorderBits(value, VALUE_REORDERING[mode-1], 8);
+		return _reorderBits(value, VALUE_REORDERING[mode - 1], 8);
 	}
 }
 
@@ -280,9 +280,9 @@ static int _reorderBits(uint32_t value, const uint8_t* reordering, int reorderLe
 
 		uint32_t mask = 1 << reorderPlace; // move the bit to the position we want
 		uint32_t val = value & mask; // AND it with the original value
-		val = val >> reorderPlace; // move the bit back, so we have the correct 0 or 1
+		val >>= reorderPlace; // move the bit back, so we have the correct 0 or 1
 
-		int destinationPlace = x - 1;
+		unsigned destinationPlace = x - 1;
 
 		uint32_t newMask = 1 << destinationPlace;
 		if (val == 1) {

@@ -27,7 +27,7 @@ struct GBAVFameCart {
 
 void GBAVFameInit(struct GBAVFameCart* cart);
 void GBAVFameDetect(struct GBAVFameCart* cart, uint32_t* rom, size_t romSize);
-void GBAVFameSramWrite(struct GBAVFameCart* cart, uint32_t address, int8_t value, uint8_t* sramData);
+void GBAVFameSramWrite(struct GBAVFameCart* cart, uint32_t address, uint8_t value, uint8_t* sramData);
 uint32_t GBAVFameModifyRomAddress(struct GBAVFameCart* cart, uint32_t address, size_t romSize);
 uint32_t GBAVFameGetPatternValue(uint32_t address, int bits);
 

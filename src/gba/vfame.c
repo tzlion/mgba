@@ -118,7 +118,7 @@ uint32_t GBAVFameGetPatternValue(uint32_t address, int bits) {
 // when you read from a ROM location outside the actual ROM data or its mirror, it returns a value based on some 16-bit transformation of the address
 // which the game relies on to run
 static uint32_t _getPatternValue(uint32_t addr) {
-	addr = addr & 0x1FFFFF;
+	addr &= 0x1FFFFF;
 	uint32_t value = 0;
 	switch (addr & 0x1F0000) {
 	case 0x000000:
@@ -215,10 +215,10 @@ void GBAVFameSramWrite(struct GBAVFameCart* cart, uint32_t address, int8_t value
 	if (address >= 0xFFF8 && address <= 0xFFFC) {
 		cart->writeSequence[address - 0xFFF8] = value;
 		if (address == 0xFFFC) {
-			if (memcmp(MODE_CHANGE_START_SEQUENCE, cart->writeSequence, sizeof(MODE_CHANGE_START_SEQUENCE)) == 0){
+			if (memcmp(MODE_CHANGE_START_SEQUENCE, cart->writeSequence, sizeof(MODE_CHANGE_START_SEQUENCE)) == 0) {
 				cart->acceptingModeChange = true;
 			}
-			if (memcmp(MODE_CHANGE_END_SEQUENCE, cart->writeSequence, sizeof(MODE_CHANGE_END_SEQUENCE)) == 0){
+			if (memcmp(MODE_CHANGE_END_SEQUENCE, cart->writeSequence, sizeof(MODE_CHANGE_END_SEQUENCE)) == 0) {
 				cart->acceptingModeChange = false;
 			}
 		}

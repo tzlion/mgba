@@ -100,7 +100,7 @@ static bool _isInMirroredArea(uint32_t address, size_t romSize) {
 
 // Looks like only 16-bit reads are done by games but others are possible...
 uint32_t GBAVFameGetPatternValue(uint32_t address, int bits) {
-	switch(bits) {
+	switch (bits) {
 	case 8:
 		if (address & 1) {
 			return _getPatternValue(address) & 0xFF;
@@ -120,7 +120,7 @@ uint32_t GBAVFameGetPatternValue(uint32_t address, int bits) {
 static uint32_t _getPatternValue(uint32_t addr) {
 	addr = addr & 0x1FFFFF;
 	uint32_t value = 0;
-	switch(addr & 0x1F0000) {
+	switch (addr & 0x1F0000) {
 	case 0x000000:
 	case 0x010000:
 		value = (addr >> 1) & 0xFFFF;
